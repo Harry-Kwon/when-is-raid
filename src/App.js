@@ -11,10 +11,11 @@ import { DateTimePicker } from '@material-ui/lab';
 function App() {
 
   // check the url for a utc timestamp
-  let urlPath = window.location.pathname.slice(1);
-  let utcTimeString = `${urlPath.slice(1)}+00`
-  if(urlPath.length<=1) {
-    utcTimeString = null;
+  const searchParams = new URLSearchParams(window.location.search);
+  let urlTimeParam = searchParams.get('raidTime');
+  let utcTimeString = `${urlTimeParam}+00`
+  if(urlTimeParam == null) {
+    utcTimeString = "invalidutctime";
   }
 
   // create a time object from the url timestamp
@@ -44,9 +45,11 @@ function App() {
             value={raidTime}
             onChange={(newTime) => {
               // change the url
-              setRaidTime(newTime.utc());
-              let newUrl = `/${generateUrlTimeString(newTime)}`
-              window.history.pushState({}, 'title', newUrl);
+              if(newTime.isValid()) {
+                setRaidTime(newTime.utc());
+                let newUrl = `${window.location.href.split('?')[0]}?raidTime=${generateUrlTimeString(newTime)}`
+                window.history.pushState({}, 'title', newUrl);
+              }
             }}
             renderInput={(params) => <TextField {...params}/>}
           />
